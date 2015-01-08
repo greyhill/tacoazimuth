@@ -1,0 +1,31 @@
+<html>
+    <head>
+        <title>taco azimuth</title>
+
+        <script>
+            if(navigator.geolocation) {
+                navigator.geolocation.watchPosition(update_position);
+            } else {
+                alert("browser doesn't support geolocation :-(");
+            }
+
+            function update_position(position) {
+                console.log(position.coords.latitude + ", " + 
+                        position.coords.longitude);
+            }
+
+            if(window.DeviceOrientationEvent) {
+                window.addListener('deviceorientation', function(event) {
+                        p = document.getElementById('blah');
+                        p.html = event.alpha;
+                        }, false);
+            } else {
+                alert("browser doesn't support device orientation :-(");
+            }
+        </script>
+    </head>
+
+    <body>
+        <p id="blah"></p>
+    </body>
+</html>
