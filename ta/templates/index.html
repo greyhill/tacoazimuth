@@ -3,6 +3,13 @@
         <title>taco azimuth</title>
 
         <script>
+            heading = 0;
+            target_lat = 0;
+            target_lon = 0;
+
+            my_lat = 1;
+            my_lon = 0;
+
             if(navigator.geolocation) {
                 navigator.geolocation.watchPosition(update_position);
             } else {
@@ -10,15 +17,40 @@
             }
 
             function update_position(position) {
-                console.log(position.coords.latitude + ", " + 
-                        position.coords.longitude);
+                console.log(position);
+
+                my_lat = position.coords.latitude;
+                my_lon = position.coords.longitude;
+
+                var req = new XMLHttpRequest();
+                req.open('POST', '/tacos');
+                req.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+                req.onload = function(e) { 
+                    results = eval('(' + this.response + ')');
+                    target_lat = results['lat'];
+                    target_lon = results['lon'];
+                    update_compass();
+                }
+                req.send('lat=' + my_lat + '&' + 'lon=' + my_lon);
+            }
+
+            function update_orientation(event) {
+                heading = event.webkitCompassHeading;
+                update_compass();
+            }
+
+            function update_compass() {
+                compass = document.getElementById("compass");
+                dlat = target_lat - my_lat;
+                dlon = target_lon - my_lon;
+                phi = Math.atan2(dlat, dlon) * 180.0 / Math.PI;
+                target = phi - heading;
+                compass.style.webkitTransform = "rotate(" + target + "deg)";
             }
 
             if(window.DeviceOrientationEvent) {
-                window.addListener('deviceorientation', function(event) {
-                        p = document.getElementById('blah');
-                        p.html = event.alpha;
-                        }, false);
+                window.addEventListener("deviceorientation", 
+                        update_orientation, false);
             } else {
                 alert("browser doesn't support device orientation :-(");
             }
@@ -26,6 +58,9 @@
     </head>
 
     <body>
-        <p id="blah"></p>
+        <center>
+            <img src="/static/compass.png" width="100%" id="compass" style="">
+        </center>
     </body>
 </html>
+
